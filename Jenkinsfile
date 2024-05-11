@@ -34,35 +34,4 @@ pipeline {
       }
     }
 
-    // 4. (Optional) Login to Docker Hub (if pushing images)
-    stage('Login to Docker Hub (if needed)') {
-      when {
-        expression { return sh 'docker images flappimen/proj:version${BUILD_NUMBER} | grep -q .', returnType: 'boolean' }  // Check if image exists locally
-      }
-      steps {
-        script {
-          withCredentials([usernamePassword(credentialsId: DOCKER_CREDENTIALS_ID, passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]) {
-            sh 'echo $DOCKER_PASSWORD | docker login --username $DOCKER_USERNAME --password-stdin'
-          }
-        }
-      }
-    }
-
-    // 5. (Optional) Push images to Docker Hub (if needed)')
-    stage('Push images to Docker Hub (if needed)') {
-      when {
-        expression { return sh 'docker images flappimen/proj:version${BUILD_NUMBER} | grep -q .', returnType: 'boolean' }  // Check if image exists locally
-      }
-      steps {
-        script {
-          sh 'docker push flappimen/proj:frontend'
-          sh 'docker push flappimen/proj:backend'
-          sh 'docker push flappimen/proj:version${BUILD_NUMBER}'  // Push tagged image (optional)
-        }
-      }
-    }
-  }
-
-  // Post-build actions (can be added as additional stages)
-  // ...
-}
+    // 
