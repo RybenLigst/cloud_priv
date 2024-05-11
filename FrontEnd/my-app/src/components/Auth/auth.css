@@ -1,0 +1,13 @@
+@media screen and (max-width: 576px) {
+    .rig {
+        display: none;
+    }
+
+    .left {
+        width: 30rem;
+    }
+
+    .leftsd{
+        width: 66.666667%;
+    }
+}
