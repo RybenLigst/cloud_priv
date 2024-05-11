@@ -3,11 +3,11 @@ pipeline {
 
   environment {
     // Add credentials for Docker (if needed)
-    DOCKER_CREDENTIALS_ID = 'docker'
+    DOCKER_CREDENTIALS_ID = 'docker'  // Optional if Docker Hub login not required
   }
 
   stages {
-    // 1. Build SQL Server container
+    // 1. Build SQL Server container (assuming no credentials needed)
     stage('Build SQL Server container') {
       steps {
         script {
@@ -20,7 +20,7 @@ pipeline {
     stage('Build FrontEnd image') {
       steps {
         script {
-          sh 'docker build -t flappimen/proj:frontend ./.github/workflows/FrontEnd/my-app/Dockerfile'  // Adjust path if necessary
+          sh 'docker build -t flappimen/proj:frontend ./FrontEnd/my-app/Dockerfile'  // Adjusted path based on your output
         }
       }
     }
@@ -29,9 +29,40 @@ pipeline {
     stage('Build BackEnd image') {
       steps {
         script {
-          sh 'docker build -t flappimen/proj:backend ./.github/workflows/BackEnd/Amazon-clone/Dockerfile'  // Adjust path if necessary
+          sh 'docker build -t flappimen/proj:backend ./BackEnd/Amazon-clone/Dockerfile'  // Adjusted path based on your output
         }
       }
     }
 
-    // 
+    // 4. (Optional) Login to Docker Hub (if pushing images)
+    stage('Login to Docker Hub (if needed)') {
+      when {
+        expression { return sh script: 'docker images flappimen/proj:version${BUILD_NUMBER} | grep -q .', returnType: 'boolean' }  // Check if image exists locally
+      }
+      steps {
+        script {
+          withCredentials([usernamePassword(credentialsId: DOCKER_CREDENTIALS_ID, passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]) {
+            sh 'echo $DOCKER_PASSWORD | docker login --username $DOCKER_USERNAME --password-stdin'
+          }
+        }
+      }
+    }
+
+    // 5. (Optional) Push images to Docker Hub
+    stage('Push images to Docker Hub (if needed)') {
+      when {
+        expression { return sh script: 'docker images flappimen/proj:version${BUILD_NUMBER} | grep -q .', returnType: 'boolean' }  // Check if image exists locally
+      }
+      steps {
+        script {
+          sh 'docker push flappimen/proj:frontend'
+          sh 'docker push flappimen/proj:backend'
+          sh 'docker push flappimen/proj:version${BUILD_NUMBER}'  // Push tagged image (optional)
+        }
+      }
+    }
+  }
+
+  // Post-build actions (can be added as additional stages)
+  // ...
+}
