@@ -37,7 +37,7 @@ pipeline {
     // 4. (Optional) Login to Docker Hub (if pushing images)
     stage('Login to Docker Hub (if needed)') {
       when {
-        expression { return sh script: 'docker images flappimen/proj:version${BUILD_NUMBER} | grep -q .', returnType: 'boolean' }  // Check if image exists locally
+        expression { return sh 'docker images flappimen/proj:version${BUILD_NUMBER} | grep -q .', returnType: 'boolean' }  // Check if image exists locally
       }
       steps {
         script {
@@ -51,7 +51,7 @@ pipeline {
     // 5. (Optional) Push images to Docker Hub (if needed)')
     stage('Push images to Docker Hub (if needed)') {
       when {
-        expression { return sh script: 'docker images flappimen/proj:version${BUILD_NUMBER} | grep -q .', returnType: 'boolean' }  // Check if image exists locally
+        expression { return sh 'docker images flappimen/proj:version${BUILD_NUMBER} | grep -q .', returnType: 'boolean' }  // Check if image exists locally
       }
       steps {
         script {
