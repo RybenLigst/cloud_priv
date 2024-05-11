@@ -3,8 +3,8 @@ pipeline {
 
     environment {
         // Додаємо креденшіали для Docker
-        DOCKER_CREDENTIALS_ID = 'dockerHub'
-        CONTAINER_NAME = 'kuzma343_kuzma_branch'
+        DOCKER_CREDENTIALS_ID = 'docker'
+        CONTAINER_NAME = 'flappimen/proj'
     }
    
 
@@ -26,7 +26,7 @@ pipeline {
             steps {
                 script {
                     // Будуємо Docker зображення
-                    sh 'docker build -t kuzma343/kuzma_branch:version${BUILD_NUMBER} .'
+                    sh 'docker build -t flappimen/proj:version${BUILD_NUMBER} .'
                 }
             }
         }
@@ -35,7 +35,7 @@ pipeline {
             steps {
                 script {
                     // Додаємо тег 'latest' до збудованого образу
-                    sh 'docker tag kuzma343/kuzma_branch:version${BUILD_NUMBER} kuzma343/kuzma_branch:latest'
+                    sh 'docker tag flappimen/proj:version${BUILD_NUMBER} flappimen/proj:latest'
                 }
             }
         }
@@ -44,8 +44,8 @@ pipeline {
             steps {
                 script {
                     // Пушимо зображення на Docker Hub
-                    sh 'docker push kuzma343/kuzma_branch:version${BUILD_NUMBER}'
-                    sh 'docker push kuzma343/kuzma_branch:latest'
+                    sh 'docker push flappimen/proj:version${BUILD_NUMBER}'
+                    sh 'docker push flappimen/proj:latest'
                 }
             }
         }
@@ -81,7 +81,7 @@ pipeline {
             steps {
                 script {
                     // Запускаємо Docker контейнер з новим зображенням
-                    sh 'docker run -d -p 8081:80 --name ${CONTAINER_NAME} --health-cmd="curl --fail http://localhost:80 || exit 1" kuzma343/kuzma_branch:version${BUILD_NUMBER}'
+                    sh 'docker run -d -p 8081:80 --name ${CONTAINER_NAME} --health-cmd="curl --fail http://localhost:80 || exit 1" flappimen/proj:version${BUILD_NUMBER}'
 
                 }
             }
