@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        // Додаємо креденшіали для Docker
+        // Add credentials for Docker
         DOCKER_CREDENTIALS_ID = 'docker'
         CONTAINER_NAME = 'flappimen/proj'
     }
@@ -11,10 +11,10 @@ pipeline {
     stages {
         
         
-       stage('Вхід у Docker') {
+       stage('Login to Docker') {
             steps {
                 script {
-                    // Використовуємо креденшіали з Jenkins для входу в Docker
+                    // Use credentials from Jenkins to log in to Docker
                     withCredentials([usernamePassword(credentialsId: DOCKER_CREDENTIALS_ID, passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]) {
                         sh 'echo $DOCKER_PASSWORD | docker login --username $DOCKER_USERNAME --password-stdin'
                     }
@@ -22,54 +22,54 @@ pipeline {
             }
         }
 
-        stage('Білд Docker зображення') {
+        stage('Docker image build') {
             steps {
                 script {
-                    // Будуємо Docker зображення
+                    // Build the Docker image
                     sh 'docker build -t flappimen/proj:version${BUILD_NUMBER} .'
                 }
             }
         }
 
-          stage('Тегування Docker зображення') {
+          stage('Docker image tagging') {
             steps {
                 script {
-                    // Додаємо тег 'latest' до збудованого образу
+                    // Add the 'latest' tag to the built image
                     sh 'docker tag flappimen/proj:version${BUILD_NUMBER} flappimen/proj:latest'
                 }
             }
         }
 
-        stage('Пуш у Docker Hub') {
+        stage('Push to Docker Hub') {
             steps {
                 script {
-                    // Пушимо зображення на Docker Hub
+                    // Push the image to Docker Hub
                     sh 'docker push flappimen/proj:version${BUILD_NUMBER}'
                     sh 'docker push flappimen/proj:latest'
                 }
             }
         }
 
-        stage('Зупинка та видалення старого контейнера') {
+        stage('Stopping and deleting the old container') {
             steps {
                 script {
-                    // Спроба зупинити та видалити старий контейнер, якщо він існує
+                    // Attempt to stop and delete the old container if it exists
                     sh """
                     if [ \$(docker ps -aq -f name=^${CONTAINER_NAME}\$) ]; then
                         docker stop ${CONTAINER_NAME}
                         docker rm ${CONTAINER_NAME}
                     else
-                        echo "Контейнер ${CONTAINER_NAME} не знайдено. Продовжуємо..."
+                        echo "Container ${CONTAINER_NAME} not found. We continue..."
                     fi
                     """
                 }
             }
         }
 
-             stage('Чистка старих образів') {
+             stage('Cleaning old images') {
             steps {
                 script {
-                    // Пушимо зображення на Docker Hub
+                    // Push the image to Docker Hub
                     sh 'docker image prune -a --filter "until=24h" --force'
 
                 }
@@ -77,10 +77,10 @@ pipeline {
         }
         
         
-        stage('Запуск Docker контейнера') {
+        stage('Launching a Docker container') {
             steps {
                 script {
-                    // Запускаємо Docker контейнер з новим зображенням
+                    // Start the Docker container with the new image
                     sh 'docker run -d -p 8081:80 --name ${CONTAINER_NAME} --health-cmd="curl --fail http://localhost:80 || exit 1" flappimen/proj:version${BUILD_NUMBER}'
 
                 }
