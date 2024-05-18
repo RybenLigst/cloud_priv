@@ -39,13 +39,14 @@ pipeline {
 
         // 2. Build FrontEnd image
         stage('Build FrontEnd image') {
-          steps {
-            script {
-                sh 'cd FrontEnd/my-app'
-                sh 'docker build -t flappimen/proj:frontend .' // file path (mb issue)
+            steps {
+                script {
+                    sh 'ls -la FrontEnd/my-app'
+                    sh 'cd FrontEnd/my-app && docker build -t flappimen/proj:frontend .'
+                }
             }
-          }
         }
+
 
         // 3. Build BackEnd image
         stage('Build BackEnd image') {
