@@ -7,7 +7,7 @@ pipeline {
   }
 
   stages {
-    // 1. Build SQL Server container (requires login)
+    // 1. Build SQL Server container (requires login
     stage('Build SQL Server container') {
       steps {
         script {
