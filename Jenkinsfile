@@ -23,18 +23,18 @@ pipeline {
         }
 
             // 1. Build SQL Server container (requires login
-        stage('Build SQL Server container') {
-        steps {
-            script {
-            withCredentials([usernamePassword(credentialsId: DOCKER_CREDENTIALS_ID, passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]) {
-                sh '''
-                echo $DOCKER_PASSWORD | docker login --username $DOCKER_USERNAME --password-stdin
-                docker run -d -e "ACCEPT_EULA=Y" -e "MSSQL_SA_PASSWORD=Qwerty-1" -p 1433:1433 --name sql111 --hostname sql mcr.microsoft.com/mssql/server:2022-latest
-                '''
-            }
-            }
-        }
-        }
+        //stage('Build SQL Server container') {
+        //steps {
+            //script {
+            //withCredentials([usernamePassword(credentialsId: DOCKER_CREDENTIALS_ID, passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]) {
+                //sh '''
+                //echo $DOCKER_PASSWORD | docker login --username $DOCKER_USERNAME --password-stdin
+                //docker run -d -e "ACCEPT_EULA=Y" -e "MSSQL_SA_PASSWORD=Qwerty-1" -p 1433:1433 --name sql111 --hostname sql mcr.microsoft.com/mssql/server:2022-latest
+                //'''
+            //}
+            //}
+        //}
+        //}
 
 
         // 2. Build FrontEnd image
