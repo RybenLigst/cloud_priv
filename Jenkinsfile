@@ -41,7 +41,8 @@ pipeline {
         stage('Build FrontEnd image') {
           steps {
             script {
-               sh 'docker build -t flappimen/proj:frontend FrontEnd/my-app/Dockerfile .' // file path (mb issue)
+                sh 'cd FrontEnd/my-app'
+                sh 'docker build -t flappimen/proj:frontend .' // file path (mb issue)
             }
           }
         }
