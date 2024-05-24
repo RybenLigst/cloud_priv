@@ -58,16 +58,16 @@ pipeline {
         }
 
         // 5. (Optional) Push images to Docker Hub
-       stage('Push images to Docker Hub (if needed)') {
-          when {
-            expression { return sh script: 'docker images flappimen/proj:version${BUILD_NUMBER} | grep -q .', returnType: 'boolean' } // Check if image exists locally
-          }
-          steps {
-            script {
-              sh 'docker push flappimen/proj:frontend'
-              sh 'docker push flappimen/proj:backend'
-            }
-          }
-        }
+        stage('Push images to Docker Hub (if needed)') {
+           when {
+             expression { return sh script: 'docker images flappimen/proj:version${BUILD_NUMBER} | grep -q .', returnType: 'boolean' } // Check if image exists locally
+           }
+           steps {
+             script {
+               sh 'docker push flappimen/proj:frontend'
+               sh 'docker push flappimen/proj:backend'
+             }
+           }
+         }
     }
 }
