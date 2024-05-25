@@ -24,6 +24,14 @@ pipeline {
             }
         }
 
+        stage('Delete old images (SQL)') {
+            steps {
+                script {
+                    sh 'docker image prune -a --filter "until=24h" --force'
+                }
+            }
+        }
+
              //1. Build SQL Server container (requires login
         stage('Build sql') {
             steps {
@@ -65,18 +73,10 @@ pipeline {
             }
         }
 
-        stage('Delete old images (SQL)') {
-            steps {
-                script {
-                    sh 'docker image prune -a --filter "until=24h" --force'
-                }
-            }
-        }
-
         stage('Start docker container (SQL)') {
             steps {
                 script {
-                    sh 'cd sql && docker run -d -p 1433:1433 --name ${CONTAINER_NAME0} flappimen/sql:version${BUILD_NUMBER}'
+                    sh 'cd sql/ && docker run -d -p 1433:1433 --name ${CONTAINER_NAME0} flappimen/sql:version${BUILD_NUMBER}'
                 }
             }
         }
