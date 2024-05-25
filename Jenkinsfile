@@ -36,7 +36,7 @@ pipeline {
         }
         }
 
-        stage('Tag docker image') {
+        stage('Tag docker image (SQL)') {
             steps {
                 script {
                     sh 'docker tag flappimen/proj:version${BUILD_NUMBER} flappimen/proj:latest'
@@ -44,7 +44,7 @@ pipeline {
             }
         }
 
-        stage('Push in Docker Hub') {
+        stage('Push in Docker Hub (SQL)') {
             steps {
                 script {
                     sh 'docker push flappimen/proj:version${BUILD_NUMBER}'
@@ -53,7 +53,7 @@ pipeline {
             }
         }
 
-        stage('Stop and delete old container') {
+        stage('Stop and delete old container (SQL)') {
             steps {
                 script {
                     sh """
@@ -68,7 +68,7 @@ pipeline {
             }
         }
 
-        stage('Delete old images') {
+        stage('Delete old images (SQL)') {
             steps {
                 script {
                     sh 'docker image prune -a --filter "until=24h" --force'
@@ -86,7 +86,7 @@ pipeline {
             }
         }
 
-        stage('Tag docker image') {
+        stage('Tag docker image (Front)') {
             steps {
                 script {
                     sh 'docker tag flappimen/proj:version${BUILD_NUMBER} flappimen/proj:latest'
@@ -94,7 +94,7 @@ pipeline {
             }
         }
 
-        stage('Push in Docker Hub') {
+        stage('Push in Docker Hub (Front)') {
             steps {
                 script {
                     sh 'docker push flappimen/proj:version${BUILD_NUMBER}'
@@ -103,7 +103,7 @@ pipeline {
             }
         }
 
-        stage('Stop and delete old container') {
+        stage('Stop and delete old container (Front)') {
             steps {
                 script {
                     sh """
@@ -118,7 +118,7 @@ pipeline {
             }
         }
 
-        stage('Delete old images') {
+        stage('Delete old images (Front)') {
             steps {
                 script {
                     sh 'docker image prune -a --filter "until=24h" --force'
@@ -126,7 +126,7 @@ pipeline {
             }
         }
 
-        stage('Start docker container') {
+        stage('Start docker container (Front)') {
             steps {
                 script {
                     sh 'docker run -d -p 81:80 --name ${CONTAINER_NAME} --health-cmd="curl --fail http://localhost:80 || exit 1" flappimen/proj:version${BUILD_NUMBER}'
@@ -135,7 +135,7 @@ pipeline {
         }
 
         // 3. Build BackEnd image
-        stage('Build BackEnd image') {
+        stage('Build BackEnd image (back)') {
         steps {
             script {
             sh 'cd BackEnd/Amazon-clone && docker build -t flappimen/proj:backend .'
@@ -143,7 +143,7 @@ pipeline {
         }
         }
 
-        stage('Tag docker image') {
+        stage('Tag docker image (Back)') {
             steps {
                 script {
                     sh 'docker tag flappimen/proj:version${BUILD_NUMBER} flappimen/proj:latest'
@@ -151,7 +151,7 @@ pipeline {
             }
         }
 
-        stage('Push in Docker Hub') {
+        stage('Push in Docker Hub (Back)') {
             steps {
                 script {
                     sh 'docker push flappimen/proj:version${BUILD_NUMBER}'
@@ -160,7 +160,7 @@ pipeline {
             }
         }
 
-        stage('Stop and delete old container') {
+        stage('Stop and delete old container (Back)') {
             steps {
                 script {
                     sh """
@@ -175,7 +175,7 @@ pipeline {
             }
         }
 
-        stage('Delete old images') {
+        stage('Delete old images (Back)') {
             steps {
                 script {
                     sh 'docker image prune -a --filter "until=24h" --force'
@@ -183,7 +183,7 @@ pipeline {
             }
         }
 
-        stage('Start docker container') {
+        stage('Start docker container (Back)') {
             steps {
                 script {
                     sh 'cd BackEnd/Amazon-clone && docker run -d -p 5034:5034 flappimen/proj:version${BUILD_NUMBER}'
