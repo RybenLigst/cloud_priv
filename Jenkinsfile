@@ -25,7 +25,7 @@ pipeline {
         }
 
              //1. Build SQL Server container (requires login
-        stage('Build FrontEnd image') {
+        stage('Build sql') {
             steps {
                 script {
                     sh 'cd sql && docker build -t flappimen/sql:version${BUILD_NUMBER} .'
