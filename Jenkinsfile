@@ -4,7 +4,9 @@ pipeline {
     environment {
         // Add credentials for Docker
         DOCKER_CREDENTIALS_ID = 'docker'
-        CONTAINER_NAME = 'flappimen/proj'
+        CONTAINER_NAME0 = 'flappimen/sql'
+        CONTAINER_NAME1 = 'flappimen/front'
+        CONTAINER_NAME2 = 'flappimen/back'
     }
    
 
@@ -57,11 +59,11 @@ pipeline {
             steps {
                 script {
                     sh """
-                    if [ \$(docker ps -aq -f name=^${CONTAINER_NAME}\$) ]; then
-                        docker stop ${CONTAINER_NAME}
-                        docker rm ${CONTAINER_NAME}
+                    if [ \$(docker ps -aq -f name=^${CONTAINER_NAME0}\$) ]; then
+                        docker stop ${CONTAINER_NAME0}
+                        docker rm ${CONTAINER_NAME0}
                     else
-                        echo "Container ${CONTAINER_NAME} not found. Couninue..."
+                        echo "Container ${CONTAINER_NAME0} not found. Couninue..."
                     fi
                     """
                 }
@@ -107,11 +109,11 @@ pipeline {
             steps {
                 script {
                     sh """
-                    if [ \$(docker ps -aq -f name=^${CONTAINER_NAME}\$) ]; then
-                        docker stop ${CONTAINER_NAME}
-                        docker rm ${CONTAINER_NAME}
+                    if [ \$(docker ps -aq -f name=^${CONTAINER_NAME1}\$) ]; then
+                        docker stop ${CONTAINER_NAME1}
+                        docker rm ${CONTAINER_NAME1}
                     else
-                        echo "Container ${CONTAINER_NAME} not found. Couninue..."
+                        echo "Container ${CONTAINER_NAME1} not found. Couninue..."
                     fi
                     """
                 }
@@ -129,7 +131,7 @@ pipeline {
         stage('Start docker container (Front)') {
             steps {
                 script {
-                    sh 'docker run -d -p 81:80 --name ${CONTAINER_NAME} --health-cmd="curl --fail http://localhost:80 || exit 1" flappimen/proj:version${BUILD_NUMBER}'
+                    sh 'cd BackEnd/Amazon-clone && docker run -d -p 81:80 --name ${CONTAINER_NAME1} --health-cmd="curl --fail http://localhost:80 || exit 1" flappimen/proj:version${BUILD_NUMBER}'
                 }
             }
         }
@@ -164,11 +166,11 @@ pipeline {
             steps {
                 script {
                     sh """
-                    if [ \$(docker ps -aq -f name=^${CONTAINER_NAME}\$) ]; then
-                        docker stop ${CONTAINER_NAME}
-                        docker rm ${CONTAINER_NAME}
+                    if [ \$(docker ps -aq -f name=^${CONTAINER_NAME2}\$) ]; then
+                        docker stop ${CONTAINER_NAME2}
+                        docker rm ${CONTAINER_NAME2}
                     else
-                        echo "Container ${CONTAINER_NAME} not found. Couninue..."
+                        echo "Container ${CONTAINER_NAME2} not found. Couninue..."
                     fi
                     """
                 }
@@ -186,7 +188,7 @@ pipeline {
         stage('Start docker container (Back)') {
             steps {
                 script {
-                    sh 'cd BackEnd/Amazon-clone && docker run -d -p 5034:5034 flappimen/proj:version${BUILD_NUMBER}'
+                    sh 'cd BackEnd/Amazon-clone && docker run -d -p 5034:5034 --name ${CONTAINER_NAME1} flappimen/proj:version${BUILD_NUMBER}'
                 }
             }
         }
