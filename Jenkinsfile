@@ -25,58 +25,58 @@ pipeline {
         }
 
              //1. Build SQL Server container (requires login
-        stage('Build SQL Server container') {
-        steps {
-            script {
-            withCredentials([usernamePassword(credentialsId: DOCKER_CREDENTIALS_ID, passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]) {
-                sh '''
-                echo $DOCKER_PASSWORD | docker login --username $DOCKER_USERNAME --password-stdin
-                docker run -d -e "ACCEPT_EULA=Y" -e "MSSQL_SA_PASSWORD=Qwerty-1" -p 1433:1433 --name sql111 --hostname sql flappimen/proj:version${BUILD_NUMBER}
-                '''
-            }
-            }
-        }
-        }
+        //stage('Build SQL Server container') {
+        //steps {
+            //script {
+            //withCredentials([usernamePassword(credentialsId: DOCKER_CREDENTIALS_ID, passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]) {
+                //sh '''
+                //echo $DOCKER_PASSWORD | docker login --username $DOCKER_USERNAME --password-stdin
+                //docker run -d -e "ACCEPT_EULA=Y" -e "MSSQL_SA_PASSWORD=Qwerty-1" -p 1433:1433 --name sql111 --hostname sql mcr.microsoft.com/mssql/server:2022-latest
+                //'''
+            //}
+            //}
+        //}
+        //}
 
-        stage('Tag docker image (SQL)') {
-            steps {
-                script {
-                    sh 'docker tag flappimen/proj:version${BUILD_NUMBER} flappimen/proj:latest'
-                }
-            }
-        }
+        //stage('Tag docker image (SQL)') {
+            //steps {
+                //script {
+                    //sh 'docker tag flappimen/proj:version${BUILD_NUMBER} flappimen/proj:latest'
+                //}
+            //}
+        //}
 
-        stage('Push in Docker Hub (SQL)') {
-            steps {
-                script {
-                    sh 'docker push flappimen/proj:version${BUILD_NUMBER}'
-                    sh 'docker push flappimen/proj:latest'
-                }
-            }
-        }
+        //stage('Push in Docker Hub (SQL)') {
+            //steps {
+                //script {
+                    //sh 'docker push flappimen/proj:version${BUILD_NUMBER}'
+                    //sh 'docker push flappimen/proj:latest'
+                //}
+            //}
+        //}
 
-        stage('Stop and delete old container (SQL)') {
-            steps {
-                script {
-                    sh """
-                    if [ \$(docker ps -aq -f name=^${CONTAINER_NAME0}\$) ]; then
-                        docker stop ${CONTAINER_NAME0}
-                        docker rm ${CONTAINER_NAME0}
-                    else
-                        echo "Container ${CONTAINER_NAME0} not found. Couninue..."
-                    fi
-                    """
-                }
-            }
-        }
+        //stage('Stop and delete old container (SQL)') {
+            //steps {
+                //script {
+                    //sh """
+                    //if [ \$(docker ps -aq -f name=^${CONTAINER_NAME0}\$) ]; then
+                        //docker stop ${CONTAINER_NAME0}
+                        //docker rm ${CONTAINER_NAME0}
+                    //else
+                        //echo "Container ${CONTAINER_NAME0} not found. Couninue..."
+                    //fi
+                    //"""
+                //}
+            //}
+        //}
 
-        stage('Delete old images (SQL)') {
-            steps {
-                script {
-                    sh 'docker image prune -a --filter "until=24h" --force'
-                }
-            }
-        }
+        //stage('Delete old images (SQL)') {
+            //steps {
+                //script {
+                    //sh 'docker image prune -a --filter "until=24h" --force'
+                //}
+            //}
+        //}
 
 
         // 2. Build FrontEnd image
