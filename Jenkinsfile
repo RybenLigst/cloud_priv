@@ -73,12 +73,19 @@ pipeline {
             }
         }
 
+        stage('Start docker container (SQL)') {
+            steps {
+                script {
+                    sh 'cd sql && docker run -d -p 1433:1433 --name ${CONTAINER_NAME0} flappimen/sql:version${BUILD_NUMBER}'
+                }
+            }
+        }
 
         // 2. Build FrontEnd image
         stage('Build FrontEnd image') {
             steps {
                 script {
-                    sh 'cd FrontEnd/my-app && docker build -t flappimen/proj:version${BUILD_NUMBER} .'
+                    sh 'cd FrontEnd/my-app && docker build -t flappimen/front:version${BUILD_NUMBER} .'
                 }
             }
         }
@@ -86,7 +93,7 @@ pipeline {
         stage('Tag docker image (Front)') {
             steps {
                 script {
-                    sh 'docker tag flappimen/proj:version${BUILD_NUMBER} flappimen/proj:latest'
+                    sh 'docker tag flappimen/front:version${BUILD_NUMBER} flappimen/front:latest'
                 }
             }
         }
@@ -94,8 +101,8 @@ pipeline {
         stage('Push in Docker Hub (Front)') {
             steps {
                 script {
-                    sh 'docker push flappimen/proj:version${BUILD_NUMBER}'
-                    sh 'docker push flappimen/proj:latest'
+                    sh 'docker push flappimen/front:version${BUILD_NUMBER}'
+                    sh 'docker push flappimen/front:latest'
                 }
             }
         }
@@ -126,7 +133,7 @@ pipeline {
         stage('Start docker container (Front)') {
             steps {
                 script {
-                    sh 'cd BackEnd/Amazon-clone && docker run -d -p 81:80 --name ${CONTAINER_NAME1} --health-cmd="curl --fail http://localhost:80 || exit 1" flappimen/proj:version${BUILD_NUMBER}'
+                    sh 'cd BackEnd/Amazon-clone && docker run -d -p 81:80 --name ${CONTAINER_NAME1} --health-cmd="curl --fail http://localhost:80 || exit 1" flappimen/front:version${BUILD_NUMBER}'
                 }
             }
         }
@@ -135,7 +142,7 @@ pipeline {
         stage('Build BackEnd image (back)') {
         steps {
             script {
-            sh 'cd BackEnd/Amazon-clone && docker build -t flappimen/proj:backend .'
+            sh 'cd BackEnd/Amazon-clone && docker build -t flappimen/back:backend .'
             }
         }
         }
@@ -143,7 +150,7 @@ pipeline {
         stage('Tag docker image (Back)') {
             steps {
                 script {
-                    sh 'docker tag flappimen/proj:version${BUILD_NUMBER} flappimen/proj:latest'
+                    sh 'docker tag flappimen/back:version${BUILD_NUMBER} flappimen/back:latest'
                 }
             }
         }
@@ -151,8 +158,8 @@ pipeline {
         stage('Push in Docker Hub (Back)') {
             steps {
                 script {
-                    sh 'docker push flappimen/proj:version${BUILD_NUMBER}'
-                    sh 'docker push flappimen/proj:latest'
+                    sh 'docker push flappimen/back:version${BUILD_NUMBER}'
+                    sh 'docker push flappimen/back:latest'
                 }
             }
         }
@@ -183,7 +190,7 @@ pipeline {
         stage('Start docker container (Back)') {
             steps {
                 script {
-                    sh 'cd BackEnd/Amazon-clone && docker run -d -p 5034:5034 --name ${CONTAINER_NAME1} flappimen/proj:version${BUILD_NUMBER}'
+                    sh 'cd BackEnd/Amazon-clone && docker run -d -p 5034:5034 --name ${CONTAINER_NAME1} flappimen/back:version${BUILD_NUMBER}'
                 }
             }
         }
