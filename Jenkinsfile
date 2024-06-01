@@ -4,12 +4,11 @@ pipeline {
     environment {
         // Add credentials for Docker
         DOCKER_CREDENTIALS_ID = 'docker'
-        CONTAINER_NAME0 = 'flappimen/sql'
-        CONTAINER_NAME1 = 'flappimen/front'
-        CONTAINER_NAME2 = 'flappimen/back'
+        CONTAINER_NAME0 = 'flappimen_sql'
+        CONTAINER_NAME1 = 'flappimen_front'
+        CONTAINER_NAME2 = 'flappimen_back'
     }
 
-// = = = = D O C K E R L O G I N = = = =
     stages {
         stage('Login to Docker') {
             steps {
@@ -20,7 +19,7 @@ pipeline {
                 }
             }
         }
-// = = = = D E L E T E     O L D = = = =
+
         stage('Delete old images') {
             steps {
                 script {
@@ -28,22 +27,25 @@ pipeline {
                 }
             }
         }
-// = = = = S      Q      L = = = =
-        stage('Build _SQL_') {
+
+        // Build SQL Server container
+        stage('Build sql') {
             steps {
                 script {
-                    sh 'cd sql/ && docker build -t flappimen/sql:version${BUILD_NUMBER} .'
+                    sh 'cd sql && docker build -t flappimen/sql:version${BUILD_NUMBER} .'
                 }
             }
         }
-        stage('Tag image _SQL_') {
+
+        stage('Tag docker image (SQL)') {
             steps {
                 script {
                     sh 'docker tag flappimen/sql:version${BUILD_NUMBER} flappimen/sql:latest'
                 }
             }
         }
-        stage('Push _SQL_ in Docker Hub') {
+
+        stage('Push in Docker Hub (SQL)') {
             steps {
                 script {
                     sh 'docker push flappimen/sql:version${BUILD_NUMBER}'
@@ -51,43 +53,48 @@ pipeline {
                 }
             }
         }
-        stage('Stop AND delete _SQL_') {
+
+        stage('Stop and delete old container (SQL)') {
             steps {
                 script {
-                    sh """
-                    if [ \$(docker ps -aq -f name=^${CONTAINER_NAME_0}\$) ]; then
-                        docker stop ${CONTAINER_NAME_0}
-                        docker rm ${CONTAINER_NAME_0}
+                    sh '''
+                    if [ $(docker ps -aq -f name=^${CONTAINER_NAME0}$) ]; then
+                        docker stop ${CONTAINER_NAME0}
+                        docker rm ${CONTAINER_NAME0}
                     else
-                        echo "Container ${CONTAINER_NAME_0} not found. Couninue..."
+                        echo "Container ${CONTAINER_NAME0} not found. Continue..."
                     fi
-                    """
-                }
-            }
-        } 
-        stage('Start _SQL_ docker container') {
-            steps {
-                script {
-                    sh 'cd sql/ && docker run -d -p 1433:1433 flappimen/sql:version${BUILD_NUMBER}'
+                    '''
                 }
             }
         }
-// = = = = F R O N T E N D = = = =
-        stage('Build image _FrontEnd_') {
+
+        stage('Start docker container (SQL)') {
             steps {
                 script {
-                    sh 'cd FrontEnd/my-app/ && docker build -t flappimen/front:version${BUILD_NUMBER} .'
+                    sh 'cd sql/ && docker run -d -p 1433:1433 --name ${CONTAINER_NAME0} flappimen/sql:version${BUILD_NUMBER}'
                 }
             }
         }
-        stage('Tag image _FrontEnd_') {
+
+        // Build FrontEnd image
+        stage('Build FrontEnd image') {
+            steps {
+                script {
+                    sh 'cd FrontEnd/my-app && docker build -t flappimen/front:version${BUILD_NUMBER} .'
+                }
+            }
+        }
+
+        stage('Tag docker image (Front)') {
             steps {
                 script {
                     sh 'docker tag flappimen/front:version${BUILD_NUMBER} flappimen/front:latest'
                 }
             }
         }
-        stage('Push _FrontEnd_ in Docker Hub') {
+
+        stage('Push in Docker Hub (Front)') {
             steps {
                 script {
                     sh 'docker push flappimen/front:version${BUILD_NUMBER}'
@@ -95,43 +102,48 @@ pipeline {
                 }
             }
         }
-        stage('Stop AND delete _FrontEnd_') {
+
+        stage('Stop and delete old container (Front)') {
             steps {
                 script {
-                    sh """
-                    if [ \$(docker ps -aq -f name=^${CONTAINER_NAME_1}\$) ]; then
-                        docker stop ${CONTAINER_NAME_1}
-                        docker rm ${CONTAINER_NAME_1}
+                    sh '''
+                    if [ $(docker ps -aq -f name=^${CONTAINER_NAME1}$) ]; then
+                        docker stop ${CONTAINER_NAME1}
+                        docker rm ${CONTAINER_NAME1}
                     else
-                        echo "Container ${CONTAINER_NAME_1} not found. Couninue..."
+                        echo "Container ${CONTAINER_NAME1} not found. Continue..."
                     fi
-                    """
+                    '''
                 }
             }
         }
-        stage('Start _FrontEnd_ docker container') {
+
+        stage('Start docker container (Front)') {
             steps {
                 script {
-                    sh 'cd FrontEnd/my-app/ && docker run -d -p 81:80 flappimen/front:version${BUILD_NUMBER}'
+                    sh 'cd FrontEnd/my-app && docker run -d -p 81:80 --name ${CONTAINER_NAME1} --health-cmd="curl --fail http://localhost:80 || exit 1" flappimen/front:version${BUILD_NUMBER}'
                 }
             }
         }
-// = = = = B A C K E N D = = = =
-        stage('Build image _BackEnd_') {
+
+        // Build BackEnd image
+        stage('Build BackEnd image') {
             steps {
                 script {
-                    sh 'cd BackEnd/Amazon-clone/ && docker build -t flappimen/back:version${BUILD_NUMBER} .'
+                    sh 'cd BackEnd/Amazon-clone && docker build -t flappimen/back:version${BUILD_NUMBER} .'
                 }
             }
         }
-        stage('Tag image _BackEnd_') {
+
+        stage('Tag docker image (Back)') {
             steps {
                 script {
                     sh 'docker tag flappimen/back:version${BUILD_NUMBER} flappimen/back:latest'
                 }
             }
         }
-        stage('Push _BackEnd_ in Docker Hub') {
+
+        stage('Push in Docker Hub (Back)') {
             steps {
                 script {
                     sh 'docker push flappimen/back:version${BUILD_NUMBER}'
@@ -139,24 +151,26 @@ pipeline {
                 }
             }
         }
-        stage('Stop AND delete _BackEnd_') {
+
+        stage('Stop and delete old container (Back)') {
             steps {
                 script {
-                    sh """
-                    if [ \$(docker ps -aq -f name=^${CONTAINER_NAME_2}\$) ]; then
-                        docker stop ${CONTAINER_NAME_2}
-                        docker rm ${CONTAINER_NAME_2}
+                    sh '''
+                    if [ $(docker ps -aq -f name=^${CONTAINER_NAME2}$) ]; then
+                        docker stop ${CONTAINER_NAME2}
+                        docker rm ${CONTAINER_NAME2}
                     else
-                        echo "Container ${CONTAINER_NAME_2} not found. Couninue..."
+                        echo "Container ${CONTAINER_NAME2} not found. Continue..."
                     fi
-                    """
+                    '''
                 }
             }
         }
-        stage('Start _BackEnd_ docker container') {
+
+        stage('Start docker container (Back)') {
             steps {
                 script {
-                    sh 'cd BackEnd/Amazon-clone/ && docker run -d -p 5034:5034 flappimen/back:version${BUILD_NUMBER}'
+                    sh 'cd BackEnd/Amazon-clone && docker run -d -p 5034:5034 --name ${CONTAINER_NAME2} flappimen/back:version${BUILD_NUMBER}'
                 }
             }
         }
