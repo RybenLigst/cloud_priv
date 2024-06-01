@@ -1,11 +1,14 @@
 pipeline {
     agent any
+
     environment {
+        // Add credentials for Docker
         DOCKER_CREDENTIALS_ID = 'docker'
-        CONTAINER_NAME_0 = 'flappimen/sql'
-        CONTAINER_NAME_1 = 'flappimen/front'
-        CONTAINER_NAME_2 = 'flappimen/back'
+        CONTAINER_NAME0 = 'flappimen/sql'
+        CONTAINER_NAME1 = 'flappimen/front'
+        CONTAINER_NAME2 = 'flappimen/back'
     }
+
 // = = = = D O C K E R L O G I N = = = =
     stages {
         stage('Login to Docker') {
@@ -117,27 +120,22 @@ pipeline {
         stage('Build image _BackEnd_') {
             steps {
                 script {
-                    sh 'cd BackEnd/Amazon-clone/ && docker build -t flappimen/back
-        :version${BUILD_NUMBER} .'
+                    sh 'cd BackEnd/Amazon-clone/ && docker build -t flappimen/back:version${BUILD_NUMBER} .'
                 }
             }
         }
         stage('Tag image _BackEnd_') {
             steps {
                 script {
-                    sh 'docker tag flappimen/back
-        :version${BUILD_NUMBER} flappimen/back
-        :latest'
+                    sh 'docker tag flappimen/back:version${BUILD_NUMBER} flappimen/back:latest'
                 }
             }
         }
         stage('Push _BackEnd_ in Docker Hub') {
             steps {
                 script {
-                    sh 'docker push flappimen/back
-        :version${BUILD_NUMBER}'
-                    sh 'docker push flappimen/back
-        :latest'
+                    sh 'docker push flappimen/back:version${BUILD_NUMBER}'
+                    sh 'docker push flappimen/back:latest'
                 }
             }
         }
@@ -158,8 +156,7 @@ pipeline {
         stage('Start _BackEnd_ docker container') {
             steps {
                 script {
-                    sh 'cd BackEnd/Amazon-clone/ && docker run -d -p 5034:5034 flappimen/back
-        :version${BUILD_NUMBER}'
+                    sh 'cd BackEnd/Amazon-clone/ && docker run -d -p 5034:5034 flappimen/back:version${BUILD_NUMBER}'
                 }
             }
         }
