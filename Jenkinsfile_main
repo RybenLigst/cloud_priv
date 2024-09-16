@@ -2,12 +2,10 @@ pipeline {
   agent any
 
   environment {
-    // Add credentials for Docker (required)
     DOCKER_CREDENTIALS_ID = 'docker'
   }
 
   stages {
-    // 1. Build SQL Server container (requires login
     stage('Build SQL Server container') {
       steps {
         script {
@@ -21,28 +19,27 @@ pipeline {
       }
     }
 
-    // 2. Build FrontEnd image
     stage('Build FrontEnd image') {
       steps {
         script {
-          sh 'docker build -t flappimen/proj:frontend ./FrontEnd/my-app/Dockerfile' // file path (mb issue)
+          sh 'docker build -t flappimen/proj:frontend ./FrontEnd/my-app/Dockerfile'
         }
       }
     }
 
-    // 3. Build BackEnd image
     stage('Build BackEnd image') {
       steps {
         script {
-          sh 'docker build -t flappimen/proj:backend ./BackEnd/Amazon-clone/Dockerfile' // file path (mb issue)
+          sh 'docker build -t flappimen/proj:backend ./BackEnd/Amazon-clone/Dockerfile'
         }
       }
     }
 
-    // 4. (Optional) Login to Docker Hub
     stage('Login to Docker Hub (if needed)') {
       when {
-        expression { return sh script: 'docker images flappimen/proj:version${BUILD_NUMBER} | grep -q .', returnType: 'boolean' } // Check if image exists locally
+        expression {
+          sh(script: 'docker images flappimen/proj:version${BUILD_NUMBER} | grep -q .', returnStatus: true) == 0
+        }
       }
       steps {
         script {
@@ -53,21 +50,19 @@ pipeline {
       }
     }
 
-    // 5. (Optional) Push images to Docker Hub (if needed)
     stage('Push images to Docker Hub (if needed)') {
       when {
-        expression { return sh script: 'docker images flappimen/proj:version${BUILD_NUMBER} | grep -q .', returnType: 'boolean' } // Check if image exists locally
+        expression {
+          sh(script: 'docker images flappimen/proj:version${BUILD_NUMBER} | grep -q .', returnStatus: true) == 0
+        }
       }
       steps {
         script {
           sh 'docker push flappimen/proj:frontend'
           sh 'docker push flappimen/proj:backend'
-          sh 'docker push flappimen/proj:version${BUILD_NUMBER}' // Push tagged image (optional)
+          sh 'docker push flappimen/proj:version${BUILD_NUMBER}'
         }
       }
     }
   }
-
-  // Post-build actions (can be added as additional stages)
-  // ...
 }
