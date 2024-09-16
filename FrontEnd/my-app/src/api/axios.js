@@ -1,4 +1,4 @@
 import axios from "axios";
 
 
-export const baseURL ='http://10.10.10.55:5034';
+export const baseURL ='http://0.0.0.0:5034';
